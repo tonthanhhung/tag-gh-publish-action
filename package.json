@@ -1,0 +1,40 @@
+{
+  "name": "tag-gh-publish-action",
+  "version": "0.0.2",
+  "description": "GitHub action to automatically publish packages to github repo tag",
+  "author": "tonthanhhung",
+  "license": "MIT",
+  "private": true,
+  "bin": {
+    "tag-gh-publish-action": "./index.js"
+  },
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@actions/core": "^1.1.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.5.0"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "ecmaVersion": 2017,
+      "sourceType": "module"
+    },
+    "extends": [
+      "eslint:recommended"
+    ],
+    "env": {
+      "node": true,
+      "es6": true
+    },
+    "rules": {
+      "no-console": "off"
+    }
+  },
+  "prettier": {
+    "trailingComma": "none",
+    "arrowParens": "avoid"
+  }
+}
