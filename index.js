@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-const core = require('@actions/core');
+const core = require("@actions/core");
 
 const process = require("process");
-const {join} = require("path");
-const {spawn} = require("child_process");
-const {readFile} = require("fs");
+const { join } = require("path");
+const { spawn } = require("child_process");
+const { readFile } = require("fs");
 
 async function main() {
   const dir =
@@ -19,11 +19,11 @@ async function main() {
   const commitPattern =
     getEnv("COMMIT_PATTERN") || "^(?:Release|Version) (\\S+)";
 
-  const {name, email} = eventObj.repository.owner;
+  const { name, email } = eventObj.repository.owner;
 
   const config = {
     commitPattern,
-    tagAuthor: {name, email}
+    tagAuthor: { name, email }
   };
 
   await processDirectory(dir, config, eventObj.commits);
@@ -45,76 +45,77 @@ async function getVersion(dir) {
     throw new Error("missing version field!");
   }
 
-  const {version} = packageObj;
-  return version
+  const { version } = packageObj;
+  return version;
 }
 
 async function processDirectory(dir, config, commits) {
-
-  let version = await getVersion(dir)
-  await gitSetup(dir, config)
+  let version = await getVersion(dir);
+  await gitSetup(dir, config);
 
   await addBuiltPackage(dir);
-  version = await bumpVersion(dir, config, getCommitVersion(config, commits), commits);
+  version = await bumpVersion(
+    dir,
+    config,
+    getCommitVersion(config, commits),
+    commits
+  );
 
   await run(dir, "git", "push", "origin", `refs/tags/v${version}`);
-  await run(dir, "git", "reset", "--soft", "HEAD^")
-  await run(dir, "git", "restore", "--staged", ".")
-  await run(dir, "git", "commit", "-a", "-m", `Release ${version}`).catch(e =>
-    e instanceof ExitError && e.code === 1 ? false : Promise.reject(e)
-  )
-  await run(dir, "git", "push")
+  await run(dir, "git", "reset", "--soft", "HEAD^");
+  await run(dir, "git", "restore", "--staged", ".");
+  await run(dir, "git", "commit", "-a", "-m", `Release ${version}`);
+  await run(dir, "git", "push");
 
   console.log("Done.");
 }
 
-
 async function bumpVersion(dir, config, version, commits) {
-  const args = version ? ["--new-version", version] : [`--${getStrategyFromCommit(commits)}`]
+  const args = version
+    ? ["--new-version", version]
+    : [`--${getStrategyFromCommit(commits)}`];
 
-  await run(
-    dir,
-    "yarn",
-    "version",
-    ...args,
-  ).catch(e =>
+  await run(dir, "yarn", "version", ...args).catch(e =>
     e instanceof ExitError && e.code === 1 ? false : Promise.reject(e)
   );
 
-  const newVersion = await getVersion(dir)
-  console.log(`New version: ${newVersion}`)
+  const newVersion = await getVersion(dir);
+  console.log(`New version: ${newVersion}`);
   return newVersion;
 }
-
 
 function getCommitVersion(config, commits) {
   for (const commit of commits) {
     const match = commit.message.match(config.commitPattern);
     if (match && match[1]) {
-      return match[1]
+      return match[1];
     }
   }
-  return null
+  return null;
 }
 
 function getStrategyFromCommit(commits) {
-
-  if (commits.some(({message}) =>
-    message.includes("BREAKING CHANGE") ||
-    message.toLowerCase().includes("major")
-  )) {
-    return "major"
+  if (
+    commits.some(
+      ({ message }) =>
+        message.includes("BREAKING CHANGE") ||
+        message.toLowerCase().includes("major")
+    )
+  ) {
+    return "major";
   }
 
-  if (commits.some(({message}) =>
-    message.toLowerCase().startsWith("feat") ||
-    message.toLowerCase().includes("minor")
-  )) {
-    return "minor"
+  if (
+    commits.some(
+      ({ message }) =>
+        message.toLowerCase().startsWith("feat") ||
+        message.toLowerCase().includes("minor")
+    )
+  ) {
+    return "minor";
   }
-  return "patch"
+  return "patch";
 }
-
 
 async function readJson(file) {
   const data = await new Promise((resolve, reject) =>
@@ -130,7 +131,7 @@ async function readJson(file) {
 }
 
 async function gitSetup(dir, config) {
-  const {name, email} = config.tagAuthor;
+  const { name, email } = config.tagAuthor;
   await run(dir, "git", "config", "user.name", name);
   await run(dir, "git", "config", "user.email", email);
 }
@@ -138,7 +139,7 @@ async function gitSetup(dir, config) {
 async function addBuiltPackage(dir) {
   await run(dir, "yarn");
   await run(dir, "yarn", "build");
-  await run(dir, "git", "add", "-f", "dist")
+  await run(dir, "git", "add", "-f", "dist");
 }
 
 function run(cwd, command, ...args) {
@@ -175,8 +176,7 @@ class ExitError extends Error {
   }
 }
 
-class NeutralExitError extends Error {
-}
+class NeutralExitError extends Error {}
 
 if (require.main === module) {
   main().catch(e => {
