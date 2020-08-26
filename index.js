@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const core = require("@actions/core");
+const github = require("@actions/github");
 
 const process = require("process");
 const { join } = require("path");
@@ -25,10 +26,14 @@ async function main() {
     commitPattern,
     tagAuthor: { name, email }
   };
+  const title =
+    github.context.payload &&
+    github.context.payload.pull_request &&
+    github.context.payload.pull_request.title;
+  console.log("title", title);
+  cons;
 
-  console.log("eventObj", JSON.stringify(eventObj));
-
-  await processDirectory(dir, config, eventObj.commits);
+  await processDirectory(dir, config, [title]);
 }
 
 function getEnv(name) {
