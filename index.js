@@ -31,7 +31,6 @@ async function main() {
     github.context.payload.pull_request &&
     github.context.payload.pull_request.title;
   console.log("title", title);
-  cons;
 
   await processDirectory(dir, config, [title]);
 }
