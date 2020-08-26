@@ -26,6 +26,8 @@ async function main() {
     tagAuthor: { name, email }
   };
 
+  console.log("eventObj", JSON.stringify(eventObj));
+
   await processDirectory(dir, config, eventObj.commits);
 }
 
