@@ -85,7 +85,9 @@ async function bumpVersion(dir, config, version, commits) {
 }
 
 function getCommitVersion(config, commits) {
-  console.log("commits:", JSON.stringify(commits));
+  if (!commits) {
+    return null;
+  }
   for (const commit of commits) {
     const match = commit.message.match(config.commitPattern);
     if (match && match[1]) {
