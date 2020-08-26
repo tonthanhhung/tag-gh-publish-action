@@ -95,7 +95,7 @@ function getCommitVersion(config, commits) {
     return null;
   }
   for (const commit of commits) {
-    const match = commit.message.match(config.commitPattern);
+    const match = commit.match(config.commitPattern);
     if (match && match[1]) {
       return match[1];
     }
@@ -106,9 +106,9 @@ function getCommitVersion(config, commits) {
 function getStrategyFromCommit(commits) {
   if (
     commits.some(
-      ({ message }) =>
-        message.includes("BREAKING CHANGE") ||
-        message.toLowerCase().includes("major")
+      (commit) =>
+        commit.includes("BREAKING CHANGE") ||
+        commit.toLowerCase().includes("major")
     )
   ) {
     return "major";
@@ -116,9 +116,9 @@ function getStrategyFromCommit(commits) {
 
   if (
     commits.some(
-      ({ message }) =>
-        message.toLowerCase().startsWith("feat") ||
-        message.toLowerCase().includes("minor")
+      (commit) =>
+        commit.toLowerCase().startsWith("feat") ||
+        commit.toLowerCase().includes("minor")
     )
   ) {
     return "minor";
