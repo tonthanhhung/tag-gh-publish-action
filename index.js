@@ -70,15 +70,16 @@ async function processDirectory(dir, config, commits) {
   await run(dir, "git", "push", "origin", `refs/tags/v${version}`);
   await run(dir, "git", "reset", "--soft", "HEAD^");
   await run(dir, "git", "restore", "--staged", ".");
-  await run(dir, "git", "commit", "-a", "-m", `"Release ${version}"`);
-  await run(dir, "git", "pull");
+  await run(dir, "git", "stash");
   await run(
     dir,
     "git",
-    "push",
-    "origin",
-    `HEAD:${github.context.payload.pull_request.head.ref}`
+    "checkout",
+    github.context.payload.pull_request.head.ref
   );
+  await run(dir, "git", "stash", "pop");
+  await run(dir, "git", "commit", "-a", "-m", `"Release ${version}"`);
+  await run(dir, "git", "push");
 
   console.log("Done.");
 }
