@@ -71,7 +71,11 @@ async function processDirectory(dir, config, commits) {
   await run(dir, "git", "reset", "--soft", "HEAD^");
   await run(dir, "git", "restore", "--staged", ".");
   await run(dir, "git", "commit", "-a", "-m", `Release ${version}`);
-  await run(dir, "git", `push origin HEAD:${github.context.payload.pull_request.head.ref}`);
+  await run(
+    dir,
+    "git",
+    `push origin ${github.context.payload.pull_request.head.ref}`
+  );
 
   console.log("Done.");
 }
@@ -106,7 +110,7 @@ function getCommitVersion(config, commits) {
 function getStrategyFromCommit(commits) {
   if (
     commits.some(
-      (commit) =>
+      commit =>
         commit.includes("BREAKING CHANGE") ||
         commit.toLowerCase().includes("major")
     )
@@ -116,7 +120,7 @@ function getStrategyFromCommit(commits) {
 
   if (
     commits.some(
-      (commit) =>
+      commit =>
         commit.toLowerCase().startsWith("feat") ||
         commit.toLowerCase().includes("minor")
     )
