@@ -71,6 +71,7 @@ async function processDirectory(dir, config, commits) {
   await run(dir, "git", "reset", "--soft", "HEAD^");
   await run(dir, "git", "restore", "--staged", ".");
   await run(dir, "git", "commit", "-a", "-m", `Release ${version}`);
+  await run(dir, "git", "fetch");
   await run(
     dir,
     "git",
