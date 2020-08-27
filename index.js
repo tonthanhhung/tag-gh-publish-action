@@ -26,13 +26,7 @@ async function main() {
     commitPattern,
     tagAuthor: { name, email }
   };
-  const title =
-    github.context.payload &&
-    github.context.payload.pull_request &&
-    github.context.payload.pull_request.title;
-  console.log("title", title);
-
-  await processDirectory(dir, config, [title]);
+  await processDirectory(dir, config);
 }
 
 function getEnv(name) {
@@ -55,86 +49,14 @@ async function getVersion(dir) {
   return version;
 }
 
-async function processDirectory(dir, config, commits) {
+async function processDirectory(dir, config) {
   let version = await getVersion(dir);
+
   await gitSetup(dir, config);
-
   await addBuiltPackage(dir);
-  version = await bumpVersion(
-    dir,
-    config,
-    getCommitVersion(config, commits),
-    commits
-  );
-
   await run(dir, "git", "push", "origin", `refs/tags/v${version}`);
-  await run(dir, "git", "reset", "--soft", "HEAD^");
-  await run(dir, "git", "restore", "--staged", ".");
-  await run(dir, "git", "stash");
-  await run(dir, "git", "fetch");
 
-  await run(
-    dir,
-    "git",
-    "checkout",
-    github.context.payload.pull_request.head.ref
-  );
-  await run(dir, "git", "stash", "pop");
-  await run(dir, "git", "commit", "-a", "-m", `Release ${version}`);
-  await run(dir, "git", "push");
   console.log("Done.");
-}
-
-async function bumpVersion(dir, config, version, commits) {
-  const args = version
-    ? ["--new-version", version]
-    : [`--${getStrategyFromCommit(commits)}`];
-
-  await run(dir, "yarn", "version", ...args).catch(e =>
-    e instanceof ExitError && e.code === 1 ? false : Promise.reject(e)
-  );
-
-  const newVersion = await getVersion(dir);
-  console.log(`
-  New
-  version: ${newVersion}`);
-  return newVersion;
-}
-
-function getCommitVersion(config, commits) {
-  if (!commits) {
-    return null;
-  }
-  for (const commit of commits) {
-    const match = commit.match(config.commitPattern);
-    if (match && match[1]) {
-      return match[1];
-    }
-  }
-  return null;
-}
-
-function getStrategyFromCommit(commits) {
-  if (
-    commits.some(
-      commit =>
-        commit.includes("BREAKING CHANGE") ||
-        commit.toLowerCase().includes("major")
-    )
-  ) {
-    return "major";
-  }
-
-  if (
-    commits.some(
-      commit =>
-        commit.toLowerCase().startsWith("feat") ||
-        commit.toLowerCase().includes("minor")
-    )
-  ) {
-    return "minor";
-  }
-  return "patch";
 }
 
 async function readJson(file) {
@@ -158,8 +80,8 @@ async function gitSetup(dir, config) {
 
 async function addBuiltPackage(dir) {
   await run(dir, "yarn");
-  // await run(dir, "yarn", "build");
-  // await run(dir, "git", "add", "-f", "dist");
+  await run(dir, "yarn", "build");
+  await run(dir, "git", "add", "-f", "dist");
 }
 
 function run(cwd, command, ...args) {
