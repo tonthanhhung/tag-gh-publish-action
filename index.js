@@ -74,7 +74,7 @@ async function processDirectory(dir, config, commits) {
   await run(
     dir,
     "git", "push", "origin",
-    ${github.context.payload.pull_request.head.ref}`
+    github.context.payload.pull_request.head.ref
   );
 
   console.log("Done.");
