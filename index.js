@@ -157,7 +157,7 @@ async function gitSetup(dir, config) {
 
 async function addBuiltPackage(dir) {
   await run(dir, "yarn");
-  await run(dir, "yarn", "build");
+  // await run(dir, "yarn", "build");
   await run(dir, "git", "add", "-f", "dist");
 }
 
