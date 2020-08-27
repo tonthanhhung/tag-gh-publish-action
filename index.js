@@ -3,9 +3,9 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 
 const process = require("process");
-const {join} = require("path");
-const {spawn} = require("child_process");
-const {readFile} = require("fs");
+const { join } = require("path");
+const { spawn } = require("child_process");
+const { readFile } = require("fs");
 
 async function main() {
   const dir =
@@ -20,11 +20,11 @@ async function main() {
   const commitPattern =
     getEnv("COMMIT_PATTERN") || "^(?:Release|Version) (\\S+)";
 
-  const {name, email} = eventObj.repository.owner;
+  const { name, email } = eventObj.repository.owner;
 
   const config = {
     commitPattern,
-    tagAuthor: {name, email}
+    tagAuthor: { name, email }
   };
   const title =
     github.context.payload &&
@@ -51,7 +51,7 @@ async function getVersion(dir) {
     throw new Error("missing version field!");
   }
 
-  const {version} = packageObj;
+  const { version } = packageObj;
   return version;
 }
 
@@ -71,11 +71,14 @@ async function processDirectory(dir, config, commits) {
   await run(dir, "git", "reset", "--soft", "HEAD^");
   await run(dir, "git", "restore", "--staged", ".");
   await run(dir, "git", "commit", "-a", "-m", `Release ${version}`);
+  await run(dir, "git", "fetch", "origin");
   await run(
     dir,
-    "git", "push", "origin",
-    `HEAD:${github.context.payload.pull_request.head.ref}`
+    "git",
+    "checkout",
+    github.context.payload.pull_request.head.ref
   );
+  await run(dir, "git", "push");
 
   console.log("Done.");
 }
@@ -167,9 +170,11 @@ function run(cwd, command, ...args) {
     const buffers = [];
     proc.stderr.on("data", data => buffers.push(data));
     proc.on("error", () => {
-      reject(new Error(`
+      reject(
+        new Error(`
   command
-  failed: ${command}`));
+  failed: ${command}`)
+      );
     });
     proc.on("exit", code => {
       if (code === 0) {
