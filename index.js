@@ -80,8 +80,18 @@ async function processDirectory(dir, config, commits) {
     github.context.payload.pull_request.head.ref
   );
   await run(dir, "git", "stash", "pop");
-  await run(dir, "git", "commit", "-a", "-m", `"Release ${version}"`);
+  await run(dir, "git", "commit", "-a", "-m", `Release ${version}`);
   await run(dir, "git", "push");
+
+  const pullRequest = github.context.payload.pull_request
+  const repository = github.context.repo
+
+  await github.pulls.merge({
+    merge_method: "merge",
+    owner: repository.owner,
+    pull_number: pullRequest.number,
+    repo: repository.repo,
+  })
 
   console.log("Done.");
 }
