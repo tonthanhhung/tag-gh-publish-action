@@ -55,6 +55,7 @@ async function processDirectory(dir, config) {
   await gitSetup(dir, config);
   await addBuiltPackage(dir);
 
+  await run(dir, "git", "fetch", "--tag", "--force");
   const tagExists = await run(
     dir,
     "git",
