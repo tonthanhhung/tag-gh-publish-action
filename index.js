@@ -81,7 +81,7 @@ async function processDirectory(dir, config) {
     await run(dir, "git", "push", "origin", `refs/tags/v${version}`);
     console.log("Done.");
   } else {
-    console.log(`Tag already exists: ${tagName}`);
+    console.log(`Tag already exists: v${version}`);
     throw new NeutralExitError();
   }
 }
