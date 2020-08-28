@@ -54,10 +54,35 @@ async function processDirectory(dir, config) {
 
   await gitSetup(dir, config);
   await addBuiltPackage(dir);
-  await run(dir, "git", "commit", "-m", `Release ${version}`, "dist");
-  await run(dir, "git", "tag", "-a", "-m", `Release ${version}`, `v${version}`);
-  await run(dir, "git", "push", "origin", `refs/tags/v${version}`);
-  console.log("Done.");
+
+  const tagExists = await run(
+    dir,
+    "git",
+    "rev-parse",
+    "-q",
+    "--verify",
+    `refs/tags/v${version}`
+  ).catch(e =>
+    e instanceof ExitError && e.code === 1 ? false : Promise.reject(e)
+  );
+
+  if (!tagExists) {
+    await run(dir, "git", "commit", "-m", `Release ${version}`, "dist");
+    await run(
+      dir,
+      "git",
+      "tag",
+      "-a",
+      "-m",
+      `Release ${version}`,
+      `v${version}`
+    );
+    await run(dir, "git", "push", "origin", `refs/tags/v${version}`);
+    console.log("Done.");
+  } else {
+    console.log(`Tag already exists: ${tagName}`);
+    throw new NeutralExitError();
+  }
 }
 
 async function readJson(file) {
