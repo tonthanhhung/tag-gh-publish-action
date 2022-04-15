@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-const core = require("@actions/core");
-const github = require("@actions/github");
 
 const process = require("process");
 const { join } = require("path");
@@ -101,6 +99,7 @@ async function readJson(file) {
 
 async function gitSetup(dir, config) {
   const { name, email } = config.tagAuthor;
+  await run(dir, "git", "config", "--global" ,"--add" ,"safe.directory" ,dir);
   await run(dir, "git", "config", "user.name", name);
   await run(dir, "git", "config", "user.email", email);
 }
