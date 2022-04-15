@@ -11,10 +11,6 @@
   "scripts": {
     "lint": "eslint ."
   },
-  "dependencies": {
-    "@actions/core": "^1.1.1",
-    "@actions/github": "^4.0.0"
-  },
   "devDependencies": {
     "eslint": "^7.5.0",
     "prettier": "^2.0.5"
