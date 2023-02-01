@@ -1,6 +1,6 @@
 {
   "name": "tag-gh-publish-action",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "GitHub action to automatically publish packages to github repo tag",
   "author": "tonthanhhung",
   "license": "MIT",
