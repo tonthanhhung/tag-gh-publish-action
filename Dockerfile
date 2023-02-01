@@ -1,4 +1,4 @@
-FROM node:12-alpine
+FROM node:16-alpine
 
 LABEL "com.github.actions.name"="Publish to npm"
 LABEL "com.github.actions.description"="Automatically publish new versions to npm"
